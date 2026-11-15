@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AETHON-IV // Space Mission Crew Health Monitoring System</title>
+  
+  <!-- Sci-Fi Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Scanline CRT Overlay -->
+  <div class="scanline-overlay"></div>
+
+  <div class="app-container">
+    <!-- ====================================================================
+         SIDEBAR NAVIGATION
+         ==================================================================== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="mission-brand">
+          <div class="brand-icon-shield">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+              <path d="M2 17l10 5 10-5"></path>
+              <path d="M2 12l10 5 10-5"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="brand-title">AETHON-IV</div>
+            <div class="brand-sub">BIO-MONITORING OS</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="sidebar-nav">
+        <div class="nav-label">Navigation Consoles</div>
+        <button class="nav-btn active" id="nav-btn-overview" data-view="crew-overview">
+          <span class="nav-icon">👤</span>
+          <span>Crew Member Overview</span>
+        </button>
+
+        <button class="nav-btn" id="nav-btn-mission-control" data-view="mission-control">
+          <span class="nav-icon">🛰️</span>
+          <span>Mission Control Console</span>
+          <span class="nav-badge" id="nav-alert-count">1 ADVISORY</span>
+        </button>
+      </nav>
+
+      <!-- Crew Fast Selector in Sidebar -->
+      <div class="sidebar-crew-section">
+        <div class="nav-label">Fleet Roster (4 Astronauts)</div>
+        <div class="crew-quick-list" id="sidebar-crew-list">
+          <!-- Dynamically populated via app.js -->
+        </div>
+      </div>
+
+      <!-- Telemetry Hardware Uplink Status -->
+      <div class="sidebar-footer">
+        <div class="comm-link-status">
+          <div class="comm-row">
+            <span>DSN UPLINK:</span>
+            <span style="color: var(--cyan-core); font-weight: 700;">ACTIVE (MADRID)</span>
+          </div>
+          <div class="comm-row">
+            <span>DELAY / LATENCY:</span>
+            <span id="comm-latency">14m 22s</span>
+          </div>
+          <div class="comm-row">
+            <span>LINK STATUS:</span>
+            <span><span class="status-dot green"></span> 99.8% OK</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ====================================================================
+         MAIN CONTENT WRAPPER
+         ==================================================================== -->
+    <main class="main-wrapper">
+      <!-- Top Sticky Telemetry Bar -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="menu-toggle-btn" id="menu-toggle" aria-label="Toggle Navigation">☰</button>
+          <div class="mission-orbit-pill">
+            <span class="status-dot green"></span>
+            <span>MARS TRANSIT // ORBIT INSERTION T-42D</span>
+          </div>
+        </div>
+
+        <div class="header-center">
+          <div class="header-metric">
+            <div class="label">Mission Elapsed Time (MET)</div>
+            <div class="val cyan" id="met-clock">MET T+142:08:34:12</div>
+          </div>
+          <div class="header-metric">
+            <div class="label">Telemetry Timestamp (UTC)</div>
+            <div class="val" id="utc-clock">2026-11-15 11:09:50 UTC</div>
+          </div>
+          <div class="header-metric">
+            <div class="label">Solar Flux Index</div>
+            <div class="val" style="color: var(--green-nominal);">68.2 SFU [STABLE]</div>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <button class="hud-btn warning" id="open-sim-modal-btn">
+            <span>⚡</span>
+            <span>ANOMALY SIMULATOR</span>
+          </button>
+          <button class="hud-btn icon-btn" id="sound-toggle-btn" title="Toggle Sci-Fi Audio Feedback">
+            <span id="sound-icon">🔊</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ==================================================================
+           VIEW 1: CREW MEMBER OVERVIEW
+           ================================================================== -->
+      <section class="view-container active" id="view-crew-overview">
+        <!-- Astronaut Selector Tab Row -->
+        <div class="crew-selector-bar" id="crew-pills-bar">
+          <!-- Injected via app.js -->
+        </div>
+
+        <!-- Selected Astronaut Hero Dossier -->
+        <div class="tactical-card astronaut-dossier-card" id="astronaut-hero-dossier">
+          <div class="dossier-avatar-box" id="dossier-avatar">👩‍🚀</div>
+          <div class="dossier-info-main">
+            <div class="dossier-meta-top">
+              <h2 class="dossier-name" id="dossier-name">Sarah Vance</h2>
+              <span class="dossier-callsign" id="dossier-callsign">AEGIS-1</span>
+              <span class="pill-badge nominal" id="dossier-status-pill">NOMINAL</span>
+            </div>
+            <div class="dossier-details-grid">
+              <div class="dossier-detail-item">
+                <span>ROLE:</span> <strong id="dossier-role">Commander</strong>
+              </div>
+              <div class="dossier-detail-item">
+                <span>ASSIGNMENT:</span> <strong id="dossier-rank">Colonel / Astrodynamics Lead</strong>
+              </div>
+              <div class="dossier-detail-item">
+                <span>LOCATION:</span> <strong id="dossier-location">Command Bridge / Deck 1</strong>
+              </div>
+              <div class="dossier-detail-item">
+                <span>CURRENT TASK:</span> <strong id="dossier-task">Orbital Vector Verification & Flight Telemetry Sync</strong>
+              </div>
+              <div class="dossier-detail-item">
+                <span>BLOOD TYPE:</span> <strong id="dossier-blood">A+</strong>
+              </div>
+              <div class="dossier-detail-item">
+                <span>SUIT ID:</span> <strong id="dossier-suit">SUIT-A01 (Mark-V Aegis)</strong>
+              </div>
+            </div>
+          </div>
+          <div class="dossier-actions">
+            <button class="hud-btn primary" id="run-diagnostic-btn">
+              <span>🩺</span>
+              <span>RUN FULL SWEEP</span>
+            </button>
+            <button class="hud-btn" id="export-log-btn">
+              <span>📋</span>
+              <span>EXPORT BIO-LOG</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Vitals Numbers HUD Grid (6 Primary Telemetry Metrics) -->
+        <div class="vitals-grid">
+          <!-- Heart Rate Tile -->
+          <div class="vital-tile" id="tile-hr">
+            <div class="vital-header">
+              <span class="vital-title">HEART RATE</span>
+              <span class="vital-icon">❤️</span>
+            </div>
+            <div class="vital-value-row">
+              <span class="vital-value cyan" id="vital-hr-val">72</span>
+              <span class="vital-unit">BPM</span>
+            </div>
+            <div class="vital-footer">
+              <span>RANGE: 60-100</span>
+              <span class="vital-trend" id="vital-hr-trend">▲ STABLE</span>
+            </div>
+          </div>
+
+          <!-- Blood Pressure Tile -->
+          <div class="vital-tile" id="tile-bp">
+            <div class="vital-header">
+              <span class="vital-title">BLOOD PRESSURE</span>
+              <span class="vital-icon">🩸</span>
+            </div>
+            <div class="vital-value-row">
+              <span class="vital-value" id="vital-bp-val">118/76</span>
+              <span class="vital-unit">mmHg</span>
+            </div>
+            <div class="vital-footer">
+              <span>MAP: 90 mmHg</span>
+              <span class="vital-trend">● OPTIMAL</span>
+            </div>
+          </div>
+
+          <!-- Core Temperature Tile with Unit Switcher -->
+          <div class="vital-tile" id="tile-temp">
+            <div class="vital-header">
+              <span class="vital-title">CORE TEMP</span>
+              <button class="filter-btn" id="temp-unit-toggle" style="padding: 1px 6px; font-size: 9px;">°C / °F</button>
+            </div>
+            <div class="vital-value-row">
+              <span class="vital-value" id="vital-temp-val">36.9</span>
+              <span class="vital-unit" id="vital-temp-unit">°C</span>
+            </div>
+            <div class="vital-footer">
+              <span>NORM: 36.5-37.5</span>
+              <span class="vital-trend">● THERMAL OK</span>
+            </div>
+          </div>
+
+          <!-- Oxygen Saturation (SpO2) -->
+          <div class="vital-tile" id="tile-spo2">
+            <div class="vital-header">
+              <span class="vital-title">O2 SATURATION</span>
+              <span class="vital-icon">🫁</span>
+            </div>
+            <div class="vital-value-row">
+              <span class="vital-value cyan" id="vital-spo2-val">99.2</span>
+              <span class="vital-unit">%</span>
+            </div>
+            <div class="vital-footer">
+              <span>PLETH: REGULAR</span>
+              <span class="vital-trend">▲ OPTIMAL</span>
+            </div>
+          </div>
+
+          <!-- Respiration Rate -->
+          <div class="vital-tile" id="tile-resp">
+            <div class="vital-header">
+              <span class="vital-title">RESPIRATION</span>
+              <span class="vital-icon">💨</span>
+            </div>
+            <div class="vital-value-row">
+              <span class="vital-value" id="vital-resp-val">14</span>
+              <span class="vital-unit">BrPM</span>
+            </div>
+            <div class="vital-footer">
+              <span>TIDAL VOL: 510 mL</span>
+              <span class="vital-trend">● REGULAR</span>
+            </div>
+          </div>
+
+          <!-- Cognitive Load & Stress Tile -->
+          <div class="vital-tile" id="tile-stress">
+            <div class="vital-header">
+              <span class="vital-title">NEURAL STRESS</span>
+              <span class="vital-icon">🧠</span>
+            </div>
+            <div class="vital-value-row">
+              <span class="vital-value cyan" id="vital-stress-val">32</span>
+              <span class="vital-unit">%</span>
+            </div>
+            <div class="vital-footer">
+              <span id="vital-stress-label">LOW (NOMINAL)</span>
+              <span class="vital-trend">ALPHA WAVE</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- High-Resolution Real-Time ECG Oscilloscope Monitor -->
+        <div class="tactical-card ecg-card">
+          <div class="card-title-bar">
+            <div class="card-heading">
+              <span>📈</span>
+              <span>LIVE PHOSPHOR ECG OSCILLOSCOPE // BIOMETRIC WAVEFORM</span>
+            </div>
+            <div class="ecg-control-bar">
+              <label for="ecg-lead-select" style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">LEAD:</label>
+              <select class="ecg-select" id="ecg-lead-select">
+                <option value="Lead II">Lead II (R-Wave Dominant)</option>
+                <option value="Lead V1">Lead V1 (Atrial Vector)</option>
+                <option value="Lead V5">Lead V5 (Lateral Ventricle)</option>
+              </select>
+
+              <label for="ecg-speed-select" style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-left: 8px;">SWEEP:</label>
+              <select class="ecg-select" id="ecg-speed-select">
+                <option value="25">25 mm/s</option>
+                <option value="50">50 mm/s</option>
+              </select>
+
+              <button class="hud-btn" id="ecg-freeze-btn" style="padding: 4px 10px; font-size: 10px;">FREEZE TRACE</button>
+            </div>
+          </div>
+
+          <div class="canvas-container">
+            <div class="canvas-telemetry-overlay">
+              <div>SENSITIVITY: <span>10 mm/mV</span></div>
+              <div>FILTER: <span>0.05 - 150 Hz</span></div>
+              <div>IMPEDANCE: <span>2.1 kΩ (GOOD)</span></div>
+              <div>R-R INTERVAL: <span id="rr-interval-label">833 ms</span></div>
+            </div>
+            <canvas id="main-ecg-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             CIRCADIAN RHYTHM & SHIFT PLANNER MODULE
+             ============================================================== -->
+        <div class="tactical-card circadian-planner-card" id="circadian-planner-module">
+          <div class="card-title-bar">
+            <div class="card-heading">
+              <span>⏱️</span>
+              <span>CIRCADIAN RHYTHM & 24-HOUR SHIFT PLANNER</span>
+            </div>
+            <div class="circadian-top-badges">
+              <span class="pill-badge nominal" id="shift-roster-status-badge">STANDARD 8H ROSTER</span>
+              <span class="readiness-pill" id="circadian-readiness-badge">
+                COGNITIVE READINESS: <strong id="circadian-readiness-val">94%</strong>
+              </span>
+            </div>
+          </div>
+
+          <!-- 24-Hour Visual Horizontal Timeline Bar Container -->
+          <div class="timeline-visual-wrapper">
+            <div class="timeline-header-meta">
+              <div class="timeline-meta-left">
+                <span class="timeline-title-sub">MISSION DIURNAL CYCLE // 24.0H HORIZONTAL ROSTER</span>
+                <span id="active-duty-duration-text" style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); margin-left: 12px;">ACTIVE DUTY: 9.0h | SLEEP: 8.5h</span>
+              </div>
+              <div class="timeline-legend">
+                <div class="legend-item"><span class="legend-swatch sleep"></span> <span>Sleep (Rest & REM)</span></div>
+                <div class="legend-item"><span class="legend-swatch duty"></span> <span>Active Duty</span></div>
+                <div class="legend-item"><span class="legend-swatch exercise"></span> <span>Exercise</span></div>
+                <div class="legend-item"><span class="legend-swatch freetime"></span> <span>Free Time</span></div>
+              </div>
+            </div>
+
+            <!-- The Horizontal 24-Hour Bar -->
+            <div class="timeline-bar-container" id="timeline-bar-container">
+              <div class="timeline-bar" id="timeline-bar">
+                <!-- Dynamically generated timeline blocks -->
+              </div>
+              <!-- Current Mission Time Indicator Needle -->
+              <div class="timeline-now-marker" id="timeline-now-marker" style="left: 46%;">
+                <div class="marker-head" id="marker-head-time">11:09 UTC</div>
+                <div class="marker-line"></div>
+              </div>
+            </div>
+
+            <!-- 24-Hour Axis Markings -->
+            <div class="timeline-axis">
+              <span>00:00</span>
+              <span>02:00</span>
+              <span>04:00</span>
+              <span>06:00</span>
+              <span>08:00</span>
+              <span>10:00</span>
+              <span>12:00</span>
+              <span>14:00</span>
+              <span>16:00</span>
+              <span>18:00</span>
+              <span>20:00</span>
+              <span>22:00</span>
+              <span>24:00</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Fatigue Warning & Countermeasure HUD -->
+          <div class="fatigue-hud-panel" id="fatigue-hud-panel">
+            <!-- Dynamic Alert Indicator Banner -->
+            <div class="fatigue-alert-banner nominal" id="fatigue-alert-banner">
+              <div class="fatigue-banner-left">
+                <span class="status-dot green" id="fatigue-beacon-dot"></span>
+                <span id="fatigue-banner-title">FATIGUE STATUS: ALL SYSTEMS NOMINAL</span>
+              </div>
+              <div class="fatigue-banner-stats">
+                <span>SLEEP DEFICIT: <strong id="fatigue-sleep-deficit">0.0h</strong></span>
+                <span>DUTY OVERAGE: <strong id="fatigue-duty-overage">+0.0h</strong></span>
+                <span>RESTING HR IMPACT: <strong id="fatigue-hr-impact">+0 BPM</strong></span>
+              </div>
+            </div>
+
+            <!-- Clinical Countermeasure Guidance Card -->
+            <div class="clinical-guidance-card" id="clinical-guidance-card">
+              <div class="guidance-col-main">
+                <div class="guidance-title">
+                  <span>🩺</span> <span>MEDICAL OFFICER CLINICAL GUIDANCE & COUNTERMEASURES</span>
+                </div>
+                <div class="guidance-body" id="clinical-guidance-text">
+                  Circadian alignment optimal. Melatonin phase synchronized with habitat lighting cycle.
+                </div>
+              </div>
+              <div class="guidance-col-actions" id="countermeasure-action-box">
+                <div class="caffeine-pill" id="caffeine-recommendation-pill">
+                  <span>💊</span>
+                  <span id="caffeine-dosage-label">NO PHARMACOLOGICAL INTERVENTION NEEDED</span>
+                </div>
+                <button class="hud-btn primary" id="apply-rest-countermeasure-btn" style="display: none;">
+                  <span>⚡</span> <span>ADMINISTER CAFFEINE & PRESCRIBE REST</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Shift Simulation & Scenario Planner Bar -->
+          <div class="shift-controls-bar">
+            <span class="shift-controls-label">SHIFT PLANNER SIMULATION PRESETS:</span>
+            <div class="shift-btn-group">
+              <button class="hud-btn" id="shift-preset-nominal">
+                <span>🟢</span> <span>NOMINAL (8H REST / 8H DUTY)</span>
+              </button>
+              <button class="hud-btn warning" id="shift-preset-overtime">
+                <span>🟡</span> <span>SIMULATE EXTENDED DUTY (+3.5H)</span>
+              </button>
+              <button class="hud-btn warning" id="shift-preset-missed-sleep">
+                <span>🟠</span> <span>SIMULATE MISSED SLEEP (-3.0H)</span>
+              </button>
+              <button class="hud-btn danger" id="shift-preset-exhaustion">
+                <span>🔴</span> <span>COMPOUND FATIGUE (+4H / -3H)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary Diagnostic Tri-Grid: Suit Status, Radiation Dosimeter, Sleep Analysis -->
+        <div class="telemetry-tri-grid">
+          <!-- Suit Biometrics & Consumables -->
+          <div class="tactical-card">
+            <div class="card-title-bar">
+              <div class="card-heading">
+                <span>🛡️</span>
+                <span>EVA SUIT & LIFE SUPPORT</span>
+              </div>
+              <span class="card-subtitle" id="suit-pressure-pill">4.30 PSI NOMINAL</span>
+            </div>
+
+            <div class="metric-progress-item">
+              <div class="metric-labels">
+                <span>O2 CONSUMABLES RESERVE</span>
+                <span id="suit-o2-label">96%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="suit-o2-fill" style="width: 96%;"></div>
+              </div>
+            </div>
+
+            <div class="metric-progress-item">
+              <div class="metric-labels">
+                <span>CO2 SCRUBBER FILTER</span>
+                <span id="suit-co2-label">91%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill green" id="suit-co2-fill" style="width: 91%;"></div>
+              </div>
+            </div>
+
+            <div class="metric-progress-item">
+              <div class="metric-labels">
+                <span>SUIT INTERNAL BATTERY</span>
+                <span id="suit-batt-label">98%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="suit-batt-fill" style="width: 98%;"></div>
+              </div>
+            </div>
+
+            <div class="metric-progress-item">
+              <div class="metric-labels">
+                <span>SUIT LIQUID COOLANT TEMP</span>
+                <span id="suit-cool-label">18.2 °C</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="suit-cool-fill" style="width: 60%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Radiation Exposure & Space Dosimetry -->
+          <div class="tactical-card amber-accent">
+            <div class="card-title-bar">
+              <div class="card-heading amber">
+                <span>☢️</span>
+                <span>RADIATION DOSIMETRY</span>
+              </div>
+              <span class="card-subtitle">MAX 250 mSv / EXPEDITION</span>
+            </div>
+
+            <div class="rad-meter-container">
+              <div class="rad-icon-badge">☢️</div>
+              <div class="rad-stat-col">
+                <div class="metric-labels">
+                  <span>CUMULATIVE DOSE</span>
+                  <span style="color: var(--amber-core);" id="rad-percent">17.8% LIMIT</span>
+                </div>
+                <div class="rad-val-big" id="rad-cum-val">44.6 mSv</div>
+              </div>
+            </div>
+
+            <div class="metric-progress-item">
+              <div class="metric-labels">
+                <span>EXPEDITION PERMISSIBLE LIMIT</span>
+                <span id="rad-limit-text">44.6 / 250 mSv</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill amber" id="rad-bar-fill" style="width: 17.8%;"></div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-top: 14px; font-family: var(--font-mono); font-size: 11px;">
+              <span>HOURLY RATE: <strong style="color: var(--amber-core);" id="rad-rate">0.042 mSv/h</strong></span>
+              <span>SHIELDING: <strong style="color: var(--green-nominal);" id="rad-shield">98.2%</strong></span>
+            </div>
+          </div>
+
+          <!-- Sleep Architecture & Circadian Rhythm -->
+          <div class="tactical-card">
+            <div class="card-title-bar">
+              <div class="card-heading">
+                <span>🌙</span>
+                <span>CIRCADIAN & SLEEP METRICS</span>
+              </div>
+              <span class="card-subtitle" id="sleep-score-pill">SCORE 92/100</span>
+            </div>
+
+            <div class="metric-progress-item">
+              <div class="metric-labels">
+                <span>LAST CYCLE DURATION</span>
+                <span id="sleep-duration">7h 42m</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill green" style="width: 94%;"></div>
+              </div>
+            </div>
+
+            <div class="metric-progress-item">
+              <div class="metric-labels">
+                <span>REM SLEEP RATIO</span>
+                <span id="sleep-rem">24%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="sleep-rem-bar" style="width: 72%;"></div>
+              </div>
+            </div>
+
+            <div class="metric-progress-item">
+              <div class="metric-labels">
+                <span>DEEP / SLOW-WAVE REST</span>
+                <span id="sleep-deep">28%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="sleep-deep-bar" style="width: 84%;"></div>
+              </div>
+            </div>
+
+            <div style="margin-top: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);">
+              <div>PHASE: <strong style="color: var(--cyan-core);" id="circadian-phase">Wake Phase 03:40 / 16:00</strong></div>
+              <div style="margin-top: 4px;">SLEEP DEBT: <strong style="color: var(--green-nominal);" id="sleep-debt">-0.2 hrs (Nominal)</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Astronaut Specific Bio-Alerts & Clinical Notes -->
+        <div class="tactical-card">
+          <div class="card-title-bar">
+            <div class="card-heading">
+              <span>📑</span>
+              <span>BIOMEDICAL CLINICAL NOTES & ACTIVE ALERTS</span>
+            </div>
+            <span class="card-subtitle" id="crew-alerts-count">2 LOGGED ENTRIES</span>
+          </div>
+          <div class="alert-feed-list" id="crew-individual-alerts">
+            <!-- Dynamic alerts injected here -->
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ==================================================================
+           VIEW 2: MISSION CONTROL CENTER CONSOLE
+           ================================================================== -->
+      <section class="view-container" id="view-mission-control">
+        <!-- Latency Simulation Mode Control Strip -->
+        <div class="tactical-card latency-control-strip">
+          <div class="latency-strip-left">
+            <span class="latency-strip-title">🛰️ INTERPLANETARY TELEMETRY CONDUIT // RELAY CONFIGURATION:</span>
+            <div class="latency-btn-group">
+              <button class="hud-btn primary active-latency" id="latency-mode-mars">
+                <span>🔴</span> <span>MARS TRANSIT (22M DELAY) // DUAL SPLIT-VIEW</span>
+              </button>
+              <button class="hud-btn" id="latency-mode-direct">
+                <span>🟢</span> <span>LOW EARTH ORBIT (0.0S DIRECT SYNC)</span>
+              </button>
+            </div>
+          </div>
+          <div class="latency-strip-metrics">
+            <div class="latency-stat">
+              <span class="lbl">DISTANCE:</span>
+              <span class="val cyan" id="latency-dist-val">225,482,900 KM (1.507 AU)</span>
+            </div>
+            <div class="latency-stat">
+              <span class="lbl">ONE-WAY LIGHT TIME:</span>
+              <span class="val amber" id="latency-owlt-val">22m 14s</span>
+            </div>
+            <div class="latency-stat">
+              <span class="lbl">CARRIER LINK:</span>
+              <span class="val" style="color: var(--green-nominal);">32.1 GHz KA-BAND (DSN 70M)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Mission Fleet Alert Banner -->
+        <div class="mission-status-banner" id="mc-status-banner">
+          <div class="status-banner-left">
+            <div class="status-pulse-badge">
+              <span class="status-dot amber" id="mc-fleet-dot"></span>
+              <span id="mc-fleet-status-text">FLEET STATUS: ADVISORY ACTIVE (1 CREW ELEVATED)</span>
+            </div>
+          </div>
+          <div class="status-banner-metrics">
+            <div class="header-metric">
+              <div class="label">CREW MONITORED</div>
+              <div class="val cyan">4 / 4 ONLINE</div>
+            </div>
+            <div class="header-metric">
+              <div class="label">ACTIVE EVA DEPLOYMENT</div>
+              <div class="val amber" id="mc-active-eva">1 (MARCUS CHEN)</div>
+            </div>
+            <div class="header-metric">
+              <div class="label">HABITAT LIFE SUPPORT</div>
+              <div class="val" style="color: var(--green-nominal);">NOMINAL (101.3 kPa)</div>
+            </div>
+            <div class="header-metric">
+              <div class="label">COSMIC RADIATION FLUX</div>
+              <div class="val" style="color: var(--cyan-core);">QUIET (0.038 mSv/h)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             SPLIT-SCREEN DUAL VIEWPORTS + DATA PACKETS IN TRANSIT BRIDGE
+             ============================================================== -->
+        <div class="dual-viewport-container" id="dual-viewport-container">
+          <!-- 1. LEFT VIEWPORT: LIVE SPACECRAFT NODE -->
+          <div class="viewport-card spacecraft-viewport" id="spacecraft-viewport">
+            <div class="viewport-header">
+              <div class="viewport-header-left">
+                <div class="viewport-tag cyan-tag">🛸 LOCAL SPACECRAFT NODE</div>
+                <h3 class="viewport-title">AETHON-IV SHIPBOARD TELEMETRY</h3>
+              </div>
+              <div class="viewport-header-right">
+                <span class="live-pulse-badge">
+                  <span class="status-dot green"></span>
+                  <span>LIVE (0s LAG)</span>
+                </span>
+                <div class="viewport-timestamp cyan-text" id="spacecraft-timestamp">11:28:11 UTC</div>
+              </div>
+            </div>
+
+            <div class="viewport-status-bar">
+              <span>LOCAL TELEMETRY BUS: <strong style="color: var(--green-nominal);">SYNCHRONIZED</strong></span>
+              <span style="color: var(--cyan-core); font-weight: 700;">● REAL-TIME ONBOARD</span>
+            </div>
+
+            <!-- Spacecraft Crew Fleet Matrix (Live) -->
+            <div class="viewport-crew-list" id="spacecraft-crew-list">
+              <!-- Dynamically populated via app.js -->
+            </div>
+
+            <div class="viewport-footer-note">
+              <span>⚡ REAL-TIME: Reflects instantaneous physical astronaut status and active shipboard telemetry alarms.</span>
+            </div>
+          </div>
+
+          <!-- 2. CENTER CONDUIT: DATA PACKETS IN TRANSIT -->
+          <div class="transit-conduit-card" id="transit-conduit-card">
+            <div class="conduit-header">
+              <div class="conduit-title">
+                <span>📡</span>
+                <span>DATA PACKETS IN TRANSIT</span>
+              </div>
+              <div class="conduit-sub">225M KM DEEP SPACE RELAY</div>
+            </div>
+
+            <!-- Canvas Particle Animation of Packets Traversing Space -->
+            <div class="conduit-canvas-wrap">
+              <canvas id="transit-packet-canvas"></canvas>
+              <div class="conduit-canvas-overlay">
+                <div class="stream-label left">MARS<br><span style="color: var(--cyan-core);">TX NODE</span></div>
+                <div class="stream-direction-arrow">➔ ➔ ➔</div>
+                <div class="stream-label right">EARTH<br><span style="color: var(--amber-core);">RX DSN</span></div>
+              </div>
+            </div>
+
+            <!-- Outdated Delta Callout HUD -->
+            <div class="outdated-delta-hud">
+              <div class="delta-label">EARTH DATA OBSOLETION DELTA</div>
+              <div class="delta-value-box">
+                <span class="delta-num" id="delta-countdown-clock">22m 14s</span>
+                <span class="delta-sub">BEHIND REALITY</span>
+              </div>
+              <div class="delta-warning-text" id="delta-warning-text">
+                ⚠️ Obsolete Data: Earth flight controllers are observing telemetry from <strong>22 minutes ago</strong>. Live emergencies occurring right now aboard the spacecraft will take 22m 14s to reach Earth.
+              </div>
+            </div>
+
+            <!-- Progress Timeline & Files Queue in Transit -->
+            <div class="packet-queue-section">
+              <div class="packet-queue-title">
+                <span>📦</span> <span>FILES IN TRANSIT (OWLT QUEUE)</span>
+              </div>
+              <div class="packet-queue-list" id="packet-queue-list">
+                <!-- Dynamically populated packet progress items -->
+              </div>
+            </div>
+
+            <!-- Interactive Burst Dispatcher -->
+            <div class="conduit-actions">
+              <button class="hud-btn primary" id="transmit-new-packet-btn" style="width: 100%; justify-content: center; font-size: 10px;">
+                <span>⚡</span> <span>DISPATCH NEW TELEMETRY BURST</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. RIGHT VIEWPORT: DELAYED EARTH GROUND STATION NODE -->
+          <div class="viewport-card ground-viewport" id="ground-viewport">
+            <div class="viewport-header">
+              <div class="viewport-header-left">
+                <div class="viewport-tag amber-tag">🌍 EARTH GROUND STATION</div>
+                <h3 class="viewport-title">DSN MADRID / GOLDSTONE 70M</h3>
+              </div>
+              <div class="viewport-header-right">
+                <span class="lagged-pulse-badge">
+                  <span class="status-dot amber"></span>
+                  <span id="ground-lag-label">DELAYED (-22m)</span>
+                </span>
+                <div class="viewport-timestamp amber-text" id="ground-timestamp">11:05:57 UTC</div>
+              </div>
+            </div>
+
+            <div class="viewport-status-bar amber-bg">
+              <span>INGESTION BUFFER: <strong style="color: var(--amber-core);">OUTDATED DATA</strong></span>
+              <span style="color: var(--amber-core); font-weight: 700;" id="ground-buffer-delay-text">⚠️ -22m 14s DELAYED</span>
+            </div>
+
+            <!-- Earth Ground Station Crew Fleet Matrix (Delayed) -->
+            <div class="viewport-crew-list" id="ground-crew-list">
+              <!-- Dynamically populated via app.js -->
+            </div>
+
+            <div class="viewport-footer-note amber-border">
+              <span id="ground-footer-explanation">⚠️ OBSERVER NOTICE: Earth flight controllers believe Marcus Chen is resting at 74 BPM because his EVA-3 exertion packet is still in flight!</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lower Mission Control Dual Grid: ECLSS Telemetry & Space Weather Radar -->
+        <div class="mc-control-grid">
+          <!-- Environmental Control & Life Support (ECLSS) -->
+          <div class="tactical-card">
+            <div class="card-title-bar">
+              <div class="card-heading">
+                <span>🌀</span>
+                <span>HABITAT ECLSS // LIFE SUPPORT TELEMETRY</span>
+              </div>
+              <span class="card-subtitle">DECK 1-3 CLOSED LOOP</span>
+            </div>
+
+            <div class="eclss-meters-grid">
+              <div class="eclss-metric-box">
+                <div class="box-lbl">CABIN PRESSURE</div>
+                <div class="box-val">101.3 kPa</div>
+                <div class="box-sub">● 1.00 ATM (NOMINAL)</div>
+              </div>
+
+              <div class="eclss-metric-box">
+                <div class="box-lbl">O2 PARTIAL CONC</div>
+                <div class="box-val">20.95%</div>
+                <div class="box-sub">● 21.2 kPa O2</div>
+              </div>
+
+              <div class="eclss-metric-box">
+                <div class="box-lbl">CO2 SCRUB EFFICIENCY</div>
+                <div class="box-val">0.31 mmHg</div>
+                <div class="box-sub">● SAFE (&lt; 3.0 mmHg)</div>
+              </div>
+
+              <div class="eclss-metric-box">
+                <div class="box-lbl">HABITAT TEMP</div>
+                <div class="box-val">21.4 °C</div>
+                <div class="box-sub">● CLIMATE BALANCED</div>
+              </div>
+
+              <div class="eclss-metric-box">
+                <div class="box-lbl">RELATIVE HUMIDITY</div>
+                <div class="box-val">44.8%</div>
+                <div class="box-sub">● COMFORT CORRIDOR</div>
+              </div>
+
+              <div class="eclss-metric-box">
+                <div class="box-lbl">WATER RECOVERY</div>
+                <div class="box-val">98.7%</div>
+                <div class="box-sub">● 96.4% RESERVES</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deep Space Heliophysics & Radiation Forecast -->
+          <div class="tactical-card amber-accent">
+            <div class="card-title-bar">
+              <div class="card-heading amber">
+                <span>🛰️</span>
+                <span>HELIOSPHERIC RADIATION & EVA WINDOW</span>
+              </div>
+              <span class="card-subtitle">SOLAR SURVEILLANCE CORRIDOR</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div class="metric-progress-item">
+                <div class="metric-labels">
+                  <span>SOLAR PARTICLE EVENT (SPE) RISK INDEX</span>
+                  <span style="color: var(--green-nominal);">CLASS A0 (QUIET)</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill green" style="width: 14%;"></div>
+                </div>
+              </div>
+
+              <div class="metric-progress-item">
+                <div class="metric-labels">
+                  <span>MAGNETIC DEFLECTION SHIELDING EFFICIENCY</span>
+                  <span style="color: var(--cyan-core);">98.4% STABLE</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width: 98.4%;"></div>
+                </div>
+              </div>
+
+              <div style="padding: 12px; background: rgba(7, 12, 23, 0.7); border: 1px solid rgba(255, 170, 0, 0.2); border-radius: var(--border-radius-sm);">
+                <div style="font-family: var(--font-hud); font-size: 11px; color: var(--amber-core); margin-bottom: 4px;">
+                  ⚠️ EVA-3 OPERATION WINDOW ADVISORY
+                </div>
+                <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.4;">
+                  Solar storm forecast is clear for next 72 hours. Current EVA tether excursion on Pilot Marcus Chen is at T+02:44:10. Return airlock ingress scheduled at T+04:00:00.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission Control Master Incident & Bio-Alert Feed -->
+        <div class="tactical-card mission-incident-card">
+          <div class="card-title-bar">
+            <div class="card-heading">
+              <span>📡</span>
+              <span>MISSION CONTROL TELEMETRY LOG & EVENT STREAM</span>
+            </div>
+            <div class="filter-btn-group">
+              <button class="filter-btn active" data-filter="all">ALL</button>
+              <button class="filter-btn" data-filter="warning">WARNINGS</button>
+              <button class="filter-btn" data-filter="nominal">NOMINAL</button>
+            </div>
+          </div>
+
+          <div class="incident-table-wrap">
+            <table class="incident-table">
+              <thead>
+                <tr>
+                  <th>TIME (UTC)</th>
+                  <th>SEVERITY</th>
+                  <th>SUBSYSTEM / SOURCE</th>
+                  <th>TELEMETRY DISPATCH</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="mission-events-tbody">
+                <!-- Dynamically populated via app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 1: ANOMALY SIMULATOR
+       ==================================================================== -->
+  <div class="modal-overlay" id="sim-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">⚡ BIOMETRIC ANOMALY INJECTION SIMULATOR</div>
+        <button class="modal-close-btn" id="close-sim-modal-btn">✕</button>
+      </div>
+      <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">
+        Trigger simulated emergency scenarios to evaluate responsive telemetry alarm thresholds, audio warning chimes, and automatic clinical triage flows.
+      </p>
+
+      <div class="sim-option-list">
+        <div class="sim-option-card" id="sim-opt-tachycardia">
+          <div class="sim-opt-title">⚠️ SCENARIO A: EVA-3 EXERTION TACHYCARDIA & HYPERTHERMIA</div>
+          <div class="sim-opt-desc">Injects Marcus Chen heart rate spike to 134 BPM, core temperature rise to 38.2°C, and coolant loop saturation warning.</div>
+        </div>
+
+        <div class="sim-option-card" id="sim-opt-hypoxia">
+          <div class="sim-opt-title">🚨 SCENARIO B: COMMAND BRIDGE O2 DRIFT & COGNITIVE STRESS</div>
+          <div class="sim-opt-desc">Injects Sarah Vance SpO2 decline to 92.4%, respiration jump to 26 BrPM, and cognitive workload surge to 84%.</div>
+        </div>
+
+        <div class="sim-option-card" id="sim-opt-arrhythmia">
+          <div class="sim-opt-title">⚡ SCENARIO C: IRREGULAR VENTRICULAR PREMATURE BEATS (PVC)</div>
+          <div class="sim-opt-desc">Simulates telemetry cardiac irregularity on Takuya Sato with erratic oscilloscope waveform fluctuations.</div>
+        </div>
+
+        <div class="sim-option-card" id="sim-opt-nominal" style="border-color: var(--green-nominal);">
+          <div class="sim-opt-title" style="color: var(--green-nominal);">✅ RESTORE ALL CREW TO NOMINAL BASELINE</div>
+          <div class="sim-opt-desc">Clears all active alarms, returns heart rates, SpO2, and temperatures to normal resting parameters.</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="hud-btn" id="dismiss-sim-modal">CLOSE CONSOLE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 2: DIAGNOSTIC SWEEP PROGRESS
+       ==================================================================== -->
+  <div class="modal-overlay" id="diagnostic-modal">
+    <div class="modal-dialog" style="max-width: 460px;">
+      <div class="modal-header">
+        <div class="modal-title">🩺 AUTONOMIC BIOMETRIC SWEEP</div>
+        <button class="modal-close-btn" id="close-diag-modal-btn">✕</button>
+      </div>
+      <div style="font-family: var(--font-mono); font-size: 12px; color: var(--cyan-core); margin-bottom: 12px;" id="diag-status-text">
+        INITIALIZING FULL 12-LEAD TELEMETRY SYNCHRONIZATION...
+      </div>
+      <div class="progress-track" style="height: 12px; margin-bottom: 16px;">
+        <div class="progress-fill" id="diag-progress-fill" style="width: 0%;"></div>
+      </div>
+      <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); line-height: 1.5;" id="diag-log-text">
+        > Connecting to subcutaneous bio-implants...<br>
+        > Calibrating impedance spectra...
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button class="hud-btn primary" id="diag-done-btn" style="display: none;">COMPLETED - RETURN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script Files -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
